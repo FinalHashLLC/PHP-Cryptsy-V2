@@ -283,7 +283,7 @@ namespace FinalHashLLC
 			}
 			else
 			{
-				return $this->request('currencies/markets', $id);
+				return $this->request('currencies/' . $id . '/markets');
 			}
 		}
 
@@ -302,8 +302,14 @@ namespace FinalHashLLC
 		// Order Methods
 		public function createOrder($marketid, $ordertype, $quantity, $price)
 		{
-			return $this->request('markets/order', null, null);
-
+			$postData = array(
+				'marketid' => $marketid,
+				'ordertype' => $ordertype,
+				'quantity' => $quantity,
+				'price' => $price
+			);
+			return $this->request('order', null, null, $postData, 'POST', $postData);
+			//return $this->request('order', null, null, null	, 'POST', $postData);
 		}
 		public function orderInfo($orderid)
 		{
@@ -350,7 +356,8 @@ namespace FinalHashLLC
 
 			$headers = [
 				'Key: ' . utf8_encode($this->key),
-				'Sign: ' . $this->sign_request($query)
+				'Sign: ' . $this->sign_request($query),
+				'Expect: '
 			];
 
 			$ch = curl_init($url);
@@ -362,6 +369,7 @@ namespace FinalHashLLC
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 			curl_setopt($ch, CURLOPT_VERBOSE, true);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
+
 			if ($type != 'GET') {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 			}
@@ -375,7 +383,7 @@ namespace FinalHashLLC
 		/**
 		 * @param $query	Query Parameters
 		 * @return string	API Secret
-	    	*/
+         */
 		private function sign_request($query)
 		{
 			return hash_hmac('sha512', $query, $this->secret);
@@ -384,7 +392,7 @@ namespace FinalHashLLC
 		/**
 		 * @param $m
 		 * @throws \Exception
-        	 */
+         */
 		public function except($m)
 		{
 			throw new \Exception($m);
